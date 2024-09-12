@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Sale</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+        }
+        .contenedor {
+            width: 800px;
+            border: 1px solid black;
+            border-radius: 10px;
+        }
+        .header {
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            margin-bottom: 15px;
+            justify-content: center;
+            background-color: rgb(58, 165, 129);
+            color: white;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .data-container {
+            display: flex;
+        }
+        .data-container .user-info {
+            width: 50%;
+            border-top: 1px solid black;
+            border-right: 1px solid black;
+            border-bottom: 1px solid black;
+            padding-left: 20px;
+        }
+        .data-container .trans-info {
+            width: 50%;
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+            padding-left: 20px;
+        }
+        .product-info {
+            border-bottom: 1px solid black;
+        }
+        .product-info .product-items p {
+            display: flex;
+            justify-content: space-around;
+        }
+    </style>
+</head>
+<body>
+<div class="contenedor">
+    <div class="header">
+        <h2>DROGUERIA</h2>
+    </div>
+
+    <div class="data-container">
+        <div class="user-info">
+            <p th:text="${username}">@username</p>
+            <p th:text="${userAddress}">@userAddress</p>
+            <p th:text="${userEmail}">@email</p>
+        </div>
+        <div class="trans-info">
+            <p>Transacción: <span th:text="${typeTrx}">@typeTransaction</span></p>
+            <p>Referencia: <span th:text="${reference}">@reference</span></p>
+            <p>Fecha: <span th:text="${dateTrx}">@date</span></p>
+        </div>
+    </div>
+    <div class="product-info">
+        <h3 style="margin-left: 30px;">Productos</h3>
+        <div class="product-items" th:each="product : ${products}">
+            <p>
+                <span th:text="${product.name}">@productName</span>
+                <span th:text="${product.amount}">@productPrice</span>
+            </p>
+        </div>
+    </div>
+    <div style="text-align: end; margin-right: 50px; padding: 8px 0;">
+        TOTAL: <span th:text="${total}">@total</span>
+    </div>
+</div>
+</body>
+</html>

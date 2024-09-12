@@ -2,19 +2,16 @@ package com.msara.servicio.services.impl;
 
 import com.msara.servicio.domain.entities.*;
 import com.msara.servicio.domain.enums.TransactionEnum;
-import com.msara.servicio.domain.repositories.CartRepository;
-import com.msara.servicio.domain.repositories.ProductRepository;
-import com.msara.servicio.domain.repositories.TransactionRepository;
-import com.msara.servicio.domain.repositories.UserRepository;
+import com.msara.servicio.domain.repositories.*;
 import com.msara.servicio.services.interfaces.TransactionService;
 import static com.msara.servicio.utils.MethodsUtils.*;
+
+import com.msara.servicio.utils.VoucherUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -28,6 +25,10 @@ public class TransactionServiceImpl implements TransactionService {
     private CartRepository cartRepository;
     @Autowired
     private TransactionRepository transactionRepository;
+    @Autowired
+    private VoucherRepository voucherRepository;
+    @Autowired
+    private VoucherUtils voucherUtils;
 
     @Override
     public void buyProduct(Long userId, boolean generateVoucher) {
@@ -54,8 +55,15 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.getTransactions().add(transaction);
         transaction.getUser().add(user);
-
         transactionRepository.save(transaction); //We save the transaction
+
+        if (generateVoucher) {
+            String htmlVoucher = voucherUtils.generateVoucherSale(transaction, user);
+            VoucherEntity voucher = VoucherEntity.builder()
+                    .htmlVoucher(htmlVoucher)
+                    .build();
+            voucherRepository.save(voucher);
+        }
 
         //we clean the cart
         cartItems.clear();

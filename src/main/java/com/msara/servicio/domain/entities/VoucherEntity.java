@@ -10,19 +10,20 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "products")
+@Table(name = "vouchers")
 @Builder
-public class ProductEntity {
+public class VoucherEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String reference;
-    private double amount;
-    private int stock;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private CategoryEntity category;
+    @Column(name = "body_mail")
+    private String bodyMail;
+
+    @Column(name = "html_voucher")
+    private String htmlVoucher;
+
+    @Column(name = "pdf_voucher")
+    private String pdfVoucher;
 }
