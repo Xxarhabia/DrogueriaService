@@ -1,12 +1,15 @@
 package com.msara.servicio.services.impl;
 
 import com.msara.servicio.controllers.dto.request.ProductCreateRequest;
-import com.msara.servicio.controllers.dto.response.ProductCreateResponse;
+import com.msara.servicio.controllers.dto.response.ProductResponse;
 import com.msara.servicio.domain.entities.ProductEntity;
 import com.msara.servicio.domain.repositories.ProductRepository;
 import com.msara.servicio.services.interfaces.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,7 +21,7 @@ public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
 
     @Override
-    public ProductCreateResponse createProduct(ProductCreateRequest productRequest) {
+    public ProductResponse createProduct(ProductCreateRequest productRequest) {
         ProductEntity product = ProductEntity.builder()
                 .name(productRequest.name())
                 .reference(productRequest.reference())
@@ -27,7 +30,8 @@ public class ProductServiceImpl implements ProductService {
                 .category(productRequest.category())
                 .build();
         productRepository.save(product);
-        return new ProductCreateResponse("The product has been created successfully", LocalDateTime.now());
+        return new ProductResponse("The product has been created successfully", LocalDateTime.now(), true);
+
     }
 
     @Override
@@ -41,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductEntity updateProduct(Long id, ProductEntity product) {
+    public ProductResponse updateProduct(Long id, ProductEntity product) {
         ProductEntity productFound = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         productFound.setName(product.getName());
@@ -49,13 +53,14 @@ public class ProductServiceImpl implements ProductService {
         productFound.setAmount(product.getAmount());
         productFound.setStock(product.getStock());
 
-        return productRepository.save(productFound);
+        productRepository.save(productFound);
+        return new ProductResponse("The product was successfully updated", LocalDateTime.now(), true);
     }
 
     @Override
-    public String deleteProduct(Long id) {
-        ProductEntity product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
-        productRepository.delete(product);
-        return "Product has been deleted";
+    public ProductResponse deleteProduct(Long id) {
+            ProductEntity product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+            productRepository.delete(product);
+            return new ProductResponse("The product has been deleted successfully", LocalDateTime.now(), true);
     }
 }
