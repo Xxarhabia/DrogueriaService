@@ -1,4 +1,4 @@
-package com.msara.servicio.controllers.dto;
+package com.msara.servicio.controllers.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

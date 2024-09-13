@@ -1,4 +1,4 @@
-package com.msara.servicio.controllers.dto;
+package com.msara.servicio.controllers.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 

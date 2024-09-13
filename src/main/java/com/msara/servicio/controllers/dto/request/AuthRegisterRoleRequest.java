@@ -1,4 +1,4 @@
-package com.msara.servicio.controllers.dto;
+package com.msara.servicio.controllers.dto.request;
 
 import jakarta.validation.constraints.Size;
 import org.springframework.validation.annotation.Validated;

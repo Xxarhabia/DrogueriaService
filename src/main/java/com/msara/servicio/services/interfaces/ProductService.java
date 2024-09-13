@@ -1,5 +1,7 @@
 package com.msara.servicio.services.interfaces;
 
+import com.msara.servicio.controllers.dto.request.ProductCreateRequest;
+import com.msara.servicio.controllers.dto.response.ProductCreateResponse;
 import com.msara.servicio.domain.entities.ProductEntity;
 import org.springframework.stereotype.Component;
 
@@ -7,7 +9,7 @@ import java.util.List;
 
 public interface ProductService {
 
-    ProductEntity createProduct(ProductEntity product);
+    ProductCreateResponse createProduct(ProductCreateRequest product);
 
     ProductEntity findProduct(Long id);
 

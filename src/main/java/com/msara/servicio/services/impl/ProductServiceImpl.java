@@ -1,11 +1,14 @@
 package com.msara.servicio.services.impl;
 
+import com.msara.servicio.controllers.dto.request.ProductCreateRequest;
+import com.msara.servicio.controllers.dto.response.ProductCreateResponse;
 import com.msara.servicio.domain.entities.ProductEntity;
 import com.msara.servicio.domain.repositories.ProductRepository;
 import com.msara.servicio.services.interfaces.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -15,8 +18,16 @@ public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
 
     @Override
-    public ProductEntity createProduct(ProductEntity product) {
-        return productRepository.save(product);
+    public ProductCreateResponse createProduct(ProductCreateRequest productRequest) {
+        ProductEntity product = ProductEntity.builder()
+                .name(productRequest.name())
+                .reference(productRequest.reference())
+                .amount(productRequest.amount())
+                .stock(productRequest.stock())
+                .category(productRequest.category())
+                .build();
+        productRepository.save(product);
+        return new ProductCreateResponse("The product has been created successfully", LocalDateTime.now());
     }
 
     @Override
@@ -31,7 +42,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductEntity updateProduct(Long id, ProductEntity product) {
-        ProductEntity productFound = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        ProductEntity productFound = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
         productFound.setName(product.getName());
         productFound.setReference(product.getReference());
         productFound.setAmount(product.getAmount());

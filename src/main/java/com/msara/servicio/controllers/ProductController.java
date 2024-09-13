@@ -1,5 +1,6 @@
 package com.msara.servicio.controllers;
 
+import com.msara.servicio.controllers.dto.request.ProductCreateRequest;
 import com.msara.servicio.domain.entities.ProductEntity;
 import com.msara.servicio.services.impl.ProductServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,9 @@ public class ProductController {
     private ProductServiceImpl productService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createProduct(@RequestBody ProductEntity productReq) {
+    public ResponseEntity<?> createProduct(@RequestBody ProductCreateRequest productReq) {
         try {
-            ProductEntity product = productService.createProduct(productReq);
-            return ResponseEntity.status(201).body(product);
+            return ResponseEntity.status(201).body(productService.createProduct(productReq));
         } catch (Exception ex) {
             return ResponseEntity.status(500).body(ex.getMessage());
         }
@@ -44,7 +44,6 @@ public class ProductController {
             return ResponseEntity.status(500).body(ex.getMessage());
         }
     }
-
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody ProductEntity productReq) {

@@ -1,5 +1,6 @@
 package com.msara.servicio.services.impl;
 
+import com.msara.servicio.controllers.dto.response.TransactionSaleResponse;
 import com.msara.servicio.domain.entities.*;
 import com.msara.servicio.domain.enums.TransactionEnum;
 import com.msara.servicio.domain.repositories.*;
@@ -7,9 +8,11 @@ import com.msara.servicio.services.interfaces.TransactionService;
 import static com.msara.servicio.utils.MethodsUtils.*;
 
 import com.msara.servicio.utils.VoucherUtils;
+import com.msara.servicio.utils.pdf.PdfUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +32,11 @@ public class TransactionServiceImpl implements TransactionService {
     private VoucherRepository voucherRepository;
     @Autowired
     private VoucherUtils voucherUtils;
+    @Autowired
+    private PdfUtils pdfUtils;
 
     @Override
-    public void buyProduct(Long userId, boolean generateVoucher) {
+    public TransactionSaleResponse buyProduct(Long userId, boolean generateVoucher) {
         List<CartItemEntity> cartItems = cartRepository.findItemsByUserId(userId);
         if (cartItems.isEmpty()) {
             throw new RuntimeException("The cart is empty");
@@ -58,9 +63,16 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(transaction); //We save the transaction
 
         if (generateVoucher) {
+            String pdfVoucher;
             String htmlVoucher = voucherUtils.generateVoucherSale(transaction, user);
+            try {
+                pdfVoucher = pdfUtils.generatePdf(htmlVoucher);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             VoucherEntity voucher = VoucherEntity.builder()
                     .htmlVoucher(htmlVoucher)
+                    .pdfVoucher(pdfVoucher)
                     .build();
             voucherRepository.save(voucher);
         }
@@ -71,6 +83,9 @@ public class TransactionServiceImpl implements TransactionService {
                 .items(cartItems)
                 .build();
         cartRepository.save(cart);
+
+        return new TransactionSaleResponse(
+                "SALE", "The transaction was processed successfully", LocalDateTime.now());
     }
 
     @Override

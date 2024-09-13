@@ -21,8 +21,6 @@ public class ProductEntity {
     private String reference;
     private double amount;
     private int stock;
+    private String category;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private CategoryEntity category;
 }

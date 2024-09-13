@@ -18,9 +18,6 @@ public class VoucherEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "body_mail")
-    private String bodyMail;
-
     @Column(name = "html_voucher")
     private String htmlVoucher;
 
