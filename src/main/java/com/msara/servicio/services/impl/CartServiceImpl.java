@@ -1,5 +1,7 @@
 package com.msara.servicio.services.impl;
 
+import com.msara.servicio.controllers.dto.request.CartRequest;
+import com.msara.servicio.controllers.dto.response.CartAddItemResponse;
 import com.msara.servicio.domain.entities.CartEntity;
 import com.msara.servicio.domain.entities.CartItemEntity;
 import com.msara.servicio.domain.entities.ProductEntity;
@@ -8,6 +10,8 @@ import com.msara.servicio.domain.repositories.ProductRepository;
 import com.msara.servicio.services.interfaces.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -18,24 +22,35 @@ public class CartServiceImpl implements CartService {
     private ProductRepository productRepository;
 
     @Override
-    public void addProductToCart(Long userId, Long productId, int quantity) {
+    public CartAddItemResponse addProductToCart(Long userId, CartRequest cartRequest) {
         CartEntity cart = cartRepository.findByUserId(userId);
-        ProductEntity product = productRepository.findById(productId)
+        ProductEntity product = productRepository.findById(cartRequest.productId())
                  .orElseThrow(() -> new RuntimeException("Product not found"));
 
         CartItemEntity cartItemEntity = CartItemEntity.builder()
                 .cart(cart)
                 .product(product)
-                .quantity(quantity)
+                .quantity(cartRequest.quantity())
                 .build();
 
         cart.getItems().add(cartItemEntity);
         cartRepository.save(cart);
+
+        return new CartAddItemResponse(
+                "The product was added successfully",
+                product.getName(),
+                cartRequest.quantity());
     }
 
     @Override
     public void removeProductFromCart() {
-        //TODO terminar
+
+    }
+
+    @Override
+    public List<CartItemEntity> showItemsInCart() {
+
+        return null;
     }
 
 }
