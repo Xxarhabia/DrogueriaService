@@ -5,6 +5,7 @@ import com.msara.servicio.controllers.dto.response.CartAddItemResponse;
 import com.msara.servicio.domain.entities.CartEntity;
 import com.msara.servicio.domain.entities.CartItemEntity;
 import com.msara.servicio.domain.entities.ProductEntity;
+import com.msara.servicio.domain.repositories.CartItemRepository;
 import com.msara.servicio.domain.repositories.CartRepository;
 import com.msara.servicio.domain.repositories.ProductRepository;
 import com.msara.servicio.services.interfaces.CartService;
@@ -20,6 +21,8 @@ public class CartServiceImpl implements CartService {
     private CartRepository cartRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private CartItemRepository cartItemRepository;
 
     @Override
     public CartAddItemResponse addProductToCart(Long userId, CartRequest cartRequest) {
@@ -27,19 +30,31 @@ public class CartServiceImpl implements CartService {
         ProductEntity product = productRepository.findById(cartRequest.productId())
                  .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        CartItemEntity cartItemEntity = CartItemEntity.builder()
-                .cart(cart)
-                .product(product)
-                .quantity(cartRequest.quantity())
-                .build();
+        if (cartItemRepository.countProductsInCartItem(cart.getId(), product.getId()) > 0) {
+            CartItemEntity cartItemEntity = cartItemRepository.findCardItemByCartIdAndProductId(cart.getId(), product.getId()).orElseThrow();
+            cartItemEntity.setQuantity(cartRequest.quantity() + cartItemEntity.getQuantity());
 
-        cart.getItems().add(cartItemEntity);
-        cartRepository.save(cart);
+            cartItemRepository.save(cartItemEntity);
 
-        return new CartAddItemResponse(
-                "The product was added successfully",
-                product.getName(),
-                cartRequest.quantity());
+            return new CartAddItemResponse(
+                    "The product was added successfully",
+                    product.getName(),
+                    cartRequest.quantity());
+        } else {
+            CartItemEntity cartItemEntity = CartItemEntity.builder()
+                    .cart(cart)
+                    .product(product)
+                    .quantity(cartRequest.quantity())
+                    .build();
+
+            cart.getItems().add(cartItemEntity);
+            cartRepository.save(cart);
+
+            return new CartAddItemResponse(
+                    "The product was added successfully",
+                    product.getName(),
+                    cartRequest.quantity());
+        }
     }
 
     @Override

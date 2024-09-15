@@ -5,7 +5,8 @@ import com.msara.servicio.domain.entities.*;
 import com.msara.servicio.domain.enums.TransactionEnum;
 import com.msara.servicio.domain.repositories.*;
 import com.msara.servicio.services.interfaces.TransactionService;
-import static com.msara.servicio.utils.MethodsUtils.*;
+import com.msara.servicio.utils.DataManagementUtils;
+import com.msara.servicio.utils.DataManagementUtils.*;
 
 import com.msara.servicio.utils.VoucherUtils;
 import com.msara.servicio.utils.pdf.PdfUtils;
@@ -37,6 +38,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionSaleResponse buyProduct(Long userId, boolean generateVoucher) {
+        DataManagementUtils dataManagementUtils = new DataManagementUtils();
         List<CartItemEntity> cartItems = cartRepository.findItemsByUserId(userId);
         if (cartItems.isEmpty()) {
             throw new RuntimeException("The cart is empty");
@@ -48,7 +50,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         TransactionEntity transaction = TransactionEntity.builder()
-                .reference(referenceNumber())
+                .reference(dataManagementUtils.referenceNumber())
                 .typeTransaction(TransactionEnum.valueOf(TransactionEnum.SALE.name()))
                 .dateInsertTransaction(String.valueOf(LocalDateTime.now()))
                 .dateUpdateTransaction(String.valueOf(LocalDateTime.now()))
