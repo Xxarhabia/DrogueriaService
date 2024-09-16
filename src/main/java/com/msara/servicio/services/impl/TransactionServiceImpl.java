@@ -43,10 +43,15 @@ public class TransactionServiceImpl implements TransactionService {
         if (cartItems.isEmpty()) {
             throw new RuntimeException("The cart is empty");
         }
-        //We associate the products in the cart to the transaction
+
         List<ProductEntity> products = new ArrayList<>();
+        // agregamos el producto del carrito a la transacción
+        // restamos la cantidad del stock del producto
         for (CartItemEntity cartItem : cartItems) {
             products.add(cartItem.getProduct());
+            ProductEntity productInCart = productRepository.findById(cartItem.getProduct().getId()).orElseThrow();
+            productInCart.setStock(productInCart.getStock() - cartItem.getQuantity());
+            productRepository.save(productInCart);
         }
 
         TransactionEntity transaction = TransactionEntity.builder()
