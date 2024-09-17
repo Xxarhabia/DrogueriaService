@@ -21,6 +21,8 @@ public class TransactionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
     private String reference;
 
     @Column(name = "type_trx")
@@ -38,5 +40,5 @@ public class TransactionEntity {
     private List<ProductEntity> products = new ArrayList<>();
 
     @ManyToMany(mappedBy = "transactions")
-    private List<UserEntity> user = new ArrayList<>();
+    private List<UserEntity> users = new ArrayList<>();
 }

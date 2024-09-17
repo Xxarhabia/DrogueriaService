@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,17 +63,28 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionEntity transaction = TransactionEntity.builder()
                 .reference(dataManagementUtils.referenceNumber())
                 .typeTransaction(TransactionEnum.valueOf(TransactionEnum.SALE.name()))
-                .dateInsertTransaction(String.valueOf(LocalDateTime.now()))
-                .dateUpdateTransaction(String.valueOf(LocalDateTime.now()))
+                .dateInsertTransaction(String.valueOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))))
+                .dateUpdateTransaction(String.valueOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))))
                 .products(products)
                 .build();
 
         //We look for the user to associate the transaction with the user
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        //inicializamos las listas en caso de que no lo estén
+        if(user.getTransactions() == null) {
+            user.setTransactions(new ArrayList<>());
+        }
         user.getTransactions().add(transaction);
-        transaction.getUser().add(user);
+        if(transaction.getUsers() == null) {
+            transaction.setUsers(new ArrayList<>());
+        }
+        transaction.getUsers().add(user);
+
+        System.out.println("antes de guardar trx");
         transactionRepository.save(transaction); //We save the transaction
+        System.out.println("despues de guardar trx");
 
         if (generateVoucher) {
             String pdfVoucher;
@@ -89,15 +101,10 @@ public class TransactionServiceImpl implements TransactionService {
             voucherRepository.save(voucher);
         }
 
-        //we clean the cart
-        cartItems.clear();
-        CartEntity cart = CartEntity.builder()
-                .items(cartItems)
-                .build();
-        cartRepository.save(cart);
-
         return new TransactionSaleResponse(
-                "SALE", "The transaction was processed successfully", LocalDateTime.now());
+                "SALE",
+                "The transaction was processed successfully",
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
     }
 
     @Override
