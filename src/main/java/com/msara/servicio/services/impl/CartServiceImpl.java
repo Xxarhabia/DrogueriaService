@@ -8,6 +8,7 @@ import com.msara.servicio.domain.entities.ProductEntity;
 import com.msara.servicio.domain.repositories.CartItemRepository;
 import com.msara.servicio.domain.repositories.CartRepository;
 import com.msara.servicio.domain.repositories.ProductRepository;
+import com.msara.servicio.services.exceptions.InsufficientStockException;
 import com.msara.servicio.services.interfaces.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,10 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartAddItemResponse addProductToCart(Long userId, CartRequest cartRequest) {
         CartEntity cart = cartRepository.findByUserId(userId);
+        int countStock = productRepository.findStockByProductId(cartRequest.productId());
+        if(countStock == 0) {
+            throw new InsufficientStockException("Te product stock is insufficient");
+        }
         ProductEntity product = productRepository.findById(cartRequest.productId())
                  .orElseThrow(() -> new RuntimeException("Product not found"));
 

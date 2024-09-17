@@ -14,6 +14,8 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, Long> 
     @Query("SELECT COUNT(ci) FROM CartItemEntity ci WHERE ci.cart.id = :cartId AND ci.product.id = :productId")
     int countProductsInCartItem(@Param("cartId") Long cartId, @Param("productId") Long productId);
 
+    CartItemEntity findByCartId(Long cartId);
+
     @Query("SELECT ci FROM CartItemEntity ci WHERE ci.cart.id = :cartId AND ci.product.id = :productId")
     Optional<CartItemEntity> findCardItemByCartIdAndProductId(@Param("cartId") Long cartId, @Param("productId") Long productId);
 }

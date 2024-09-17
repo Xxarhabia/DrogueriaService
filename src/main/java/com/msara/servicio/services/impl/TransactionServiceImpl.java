@@ -28,6 +28,8 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private CartRepository cartRepository;
     @Autowired
+    private CartItemRepository cartItemRepository;
+    @Autowired
     private TransactionRepository transactionRepository;
     @Autowired
     private VoucherRepository voucherRepository;
@@ -39,7 +41,8 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionSaleResponse buyProduct(Long userId, boolean generateVoucher) {
         DataManagementUtils dataManagementUtils = new DataManagementUtils();
-        List<CartItemEntity> cartItems = cartRepository.findItemsByUserId(userId);
+        CartEntity cartFound = cartRepository.findByUserId(userId);
+        List<CartItemEntity> cartItems = cartRepository.findById(cartFound.getId()).orElseThrow().getItems();
         if (cartItems.isEmpty()) {
             throw new RuntimeException("The cart is empty");
         }
@@ -53,6 +56,8 @@ public class TransactionServiceImpl implements TransactionService {
             productInCart.setStock(productInCart.getStock() - cartItem.getQuantity());
             productRepository.save(productInCart);
         }
+        CartItemEntity cartItemFound = cartItemRepository.findByCartId(cartFound.getId());
+        cartItemRepository.deleteById(cartItemFound.getId());
 
         TransactionEntity transaction = TransactionEntity.builder()
                 .reference(dataManagementUtils.referenceNumber())
