@@ -10,6 +10,7 @@ import com.msara.servicio.utils.DataManagementUtils.*;
 
 import com.msara.servicio.utils.VoucherUtils;
 import com.msara.servicio.utils.pdf.PdfUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private PdfUtils pdfUtils;
 
+    @Transactional
     @Override
     public TransactionSaleResponse buyProduct(Long userId, boolean generateVoucher) {
         DataManagementUtils dataManagementUtils = new DataManagementUtils();
@@ -56,15 +58,18 @@ public class TransactionServiceImpl implements TransactionService {
             ProductEntity productInCart = productRepository.findById(cartItem.getProduct().getId()).orElseThrow();
             productInCart.setStock(productInCart.getStock() - cartItem.getQuantity());
             productRepository.save(productInCart);
+            System.out.println(cartItem.getId());
         }
         CartItemEntity cartItemFound = cartItemRepository.findByCartId(cartFound.getId());
-        cartItemRepository.deleteById(cartItemFound.getId());
+        //.out.println(cartItemFound.toString());
+        cartItemRepository.deleteCartItemById(cartItemFound.getId());
+        //cartItemRepository.deleteById(cartItemFound.getId());
 
         TransactionEntity transaction = TransactionEntity.builder()
                 .reference(dataManagementUtils.referenceNumber())
                 .typeTransaction(TransactionEnum.valueOf(TransactionEnum.SALE.name()))
-                .dateInsertTransaction(String.valueOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))))
-                .dateUpdateTransaction(String.valueOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))))
+                .dateInsertTransaction(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
+                .dateUpdateTransaction(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
                 .products(products)
                 .build();
 
