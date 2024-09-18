@@ -12,9 +12,14 @@ import com.msara.servicio.utils.VoucherUtils;
 import com.msara.servicio.utils.pdf.PdfUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -40,76 +45,33 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private PdfUtils pdfUtils;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Transactional
     @Override
-    public TransactionSaleResponse buyProduct(Long userId, boolean generateVoucher) {
-        DataManagementUtils dataManagementUtils = new DataManagementUtils();
-        CartEntity cartFound = cartRepository.findByUserId(userId);
-        List<CartItemEntity> cartItems = cartRepository.findById(cartFound.getId()).orElseThrow().getItems();
-        if (cartItems.isEmpty()) {
-            throw new RuntimeException("The cart is empty");
+    public TransactionSaleResponse buyProduct(Long userId, boolean generateVoucher) throws SQLException {
+
+        Connection connection = jdbcTemplate.getDataSource().getConnection();
+        String procedure = "CALL drogueria_schema.sp_buy_transaction(?,?,?)";
+
+        try (CallableStatement callableStatement = connection.prepareCall(procedure)) {
+            connection.setAutoCommit(true);
+
+            callableStatement.setLong(1, userId);
+            callableStatement.registerOutParameter(2, Types.VARCHAR);
+            callableStatement.registerOutParameter(3, Types.BOOLEAN);
+            callableStatement.execute();
+
+            String message = callableStatement.getString(2);
+            boolean status = callableStatement.getBoolean(3);
+
+            return new TransactionSaleResponse(
+                    "SALE",
+                    message,
+                    status,
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
         }
-
-        List<ProductEntity> products = new ArrayList<>();
-        // agregamos el producto del carrito a la transacción
-        // restamos la cantidad del stock del producto
-        for (CartItemEntity cartItem : cartItems) {
-            products.add(cartItem.getProduct());
-            ProductEntity productInCart = productRepository.findById(cartItem.getProduct().getId()).orElseThrow();
-            productInCart.setStock(productInCart.getStock() - cartItem.getQuantity());
-            productRepository.save(productInCart);
-            System.out.println(cartItem.getId());
-        }
-        CartItemEntity cartItemFound = cartItemRepository.findByCartId(cartFound.getId());
-        //.out.println(cartItemFound.toString());
-        cartItemRepository.deleteCartItemById(cartItemFound.getId());
-        //cartItemRepository.deleteById(cartItemFound.getId());
-
-        TransactionEntity transaction = TransactionEntity.builder()
-                .reference(dataManagementUtils.referenceNumber())
-                .typeTransaction(TransactionEnum.valueOf(TransactionEnum.SALE.name()))
-                .dateInsertTransaction(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
-                .dateUpdateTransaction(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
-                .products(products)
-                .build();
-
-        //We look for the user to associate the transaction with the user
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        //inicializamos las listas en caso de que no lo estén
-        if(user.getTransactions() == null) {
-            user.setTransactions(new ArrayList<>());
-        }
-        user.getTransactions().add(transaction);
-        if(transaction.getUsers() == null) {
-            transaction.setUsers(new ArrayList<>());
-        }
-        transaction.getUsers().add(user);
-
-        System.out.println("antes de guardar trx");
-        transactionRepository.save(transaction); //We save the transaction
-        System.out.println("despues de guardar trx");
-
-        if (generateVoucher) {
-            String pdfVoucher;
-            String htmlVoucher = voucherUtils.generateVoucherSale(transaction, user);
-            try {
-                pdfVoucher = pdfUtils.generatePdf(htmlVoucher);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            VoucherEntity voucher = VoucherEntity.builder()
-                    .htmlVoucher(htmlVoucher)
-                    .pdfVoucher(pdfVoucher)
-                    .build();
-            voucherRepository.save(voucher);
-        }
-
-        return new TransactionSaleResponse(
-                "SALE",
-                "The transaction was processed successfully",
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
     }
 
     @Override

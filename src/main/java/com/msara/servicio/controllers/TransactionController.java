@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
+
 @RestController
 @RequestMapping("/api/transaction")
 public class TransactionController {
@@ -22,7 +24,7 @@ public class TransactionController {
 
     @PostMapping("/buy")
     public ResponseEntity<TransactionSaleResponse> saleTransaction(
-            @RequestBody TransactionSaleRequest transactionRequest) {
+            @RequestBody TransactionSaleRequest transactionRequest) throws SQLException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Long userId = userRepository.findUserByEmail(username).orElseThrow().getId();
