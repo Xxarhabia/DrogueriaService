@@ -37,7 +37,7 @@ public class VoucherUtils {
         //tota;
         context.setVariable("total", calculateTotal(transaction.getProducts()));
 
-        return templateEngine.process("pdf_sale", context);
+        return templateEngine.process("VoucherSale", context);
     }
 
     private double calculateTotal(List<ProductEntity> products) {

@@ -18,9 +18,9 @@ public class VoucherEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "html_voucher")
+    @Column(name = "html_voucher", columnDefinition = "TEXT")
     private String htmlVoucher;
 
-    @Column(name = "pdf_voucher")
+    @Column(name = "pdf_voucher", columnDefinition = "TEXT")
     private String pdfVoucher;
 }

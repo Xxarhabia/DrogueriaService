@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -29,22 +30,15 @@ import java.util.List;
 public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
-    private ProductRepository productRepository;
+    private TransactionRepository transactionRepository;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private CartRepository cartRepository;
-    @Autowired
-    private CartItemRepository cartItemRepository;
-    @Autowired
-    private TransactionRepository transactionRepository;
     @Autowired
     private VoucherRepository voucherRepository;
     @Autowired
     private VoucherUtils voucherUtils;
     @Autowired
     private PdfUtils pdfUtils;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -53,7 +47,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionSaleResponse buyProduct(Long userId, boolean generateVoucher) throws SQLException {
 
         Connection connection = jdbcTemplate.getDataSource().getConnection();
-        String procedure = "CALL drogueria_schema.sp_buy_transaction(?,?,?)";
+        String procedure = "CALL drogueria_schema.sp_buy_transaction(?,?,?,?)";
 
         try (CallableStatement callableStatement = connection.prepareCall(procedure)) {
             connection.setAutoCommit(true);
@@ -61,10 +55,32 @@ public class TransactionServiceImpl implements TransactionService {
             callableStatement.setLong(1, userId);
             callableStatement.registerOutParameter(2, Types.VARCHAR);
             callableStatement.registerOutParameter(3, Types.BOOLEAN);
+            callableStatement.registerOutParameter(4, Types.BIGINT);
             callableStatement.execute();
 
             String message = callableStatement.getString(2);
             boolean status = callableStatement.getBoolean(3);
+            Long transactionId = callableStatement.getLong(4);
+
+            if (generateVoucher) {
+                TransactionEntity transaction = transactionRepository.findById(transactionId).orElseThrow(
+                        () -> new RuntimeException("Transaction not found"));
+                UserEntity user = userRepository.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+
+                String pdfVoucher;
+                String htmlVoucher = voucherUtils.generateVoucherSale(transaction, user);
+                try {
+                    pdfVoucher = pdfUtils.generatePdf(htmlVoucher);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                VoucherEntity voucher = VoucherEntity.builder()
+                        .htmlVoucher(htmlVoucher)
+                        .pdfVoucher(pdfVoucher)
+                        .build();
+                voucherRepository.save(voucher);
+            }
 
             return new TransactionSaleResponse(
                     "SALE",
