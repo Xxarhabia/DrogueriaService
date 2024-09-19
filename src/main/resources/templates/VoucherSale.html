@@ -44,7 +44,7 @@
         }
         .total-row {
             text-align: right;
-            padding-right: 50px;
+            padding-right: 30px;
             font-weight: bold;
         }
     </style>
@@ -57,51 +57,53 @@
 
     <table>
         <tr>
-            <th colspan="2">Datos del Cliente</th>
+            <th colspan="3">Datos del Cliente</th>
         </tr>
         <tr>
             <td><b>Nombre</b></td>
-            <td th:text="${username}">@username</td>
+            <td colspan="2" th:text="${username}">@username</td>
         </tr>
         <tr>
             <td><b>Dirección</b></td>
-            <td th:text="${userAddress}">@userAddress</td>
+            <td colspan="2" th:text="${userAddress}">@userAddress</td>
         </tr>
         <tr>
             <td><b>Correo</b></td>
-            <td th:text="${userEmail}">@userEmail</td>
+            <td colspan="2" th:text="${userEmail}">@userEmail</td>
         </tr>
 
         <tr>
-            <th colspan="2">Datos de la Transacción</th>
+            <th colspan="3">Datos de la Transacción</th>
         </tr>
         <tr>
             <td><b>Transacción</b></td>
-            <td th:text="${typeTrx}">@typeTransaction</td>
+            <td colspan="2" th:text="${typeTrx}">@typeTransaction</td>
         </tr>
         <tr>
             <td><b>Referencia</b></td>
-            <td th:text="${reference}">@reference</td>
+            <td colspan="2" th:text="${reference}">@reference</td>
         </tr>
         <tr>
             <td><b>Fecha</b></td>
-            <td th:text="${dateTrx}">@dateTrx</td>
+            <td colspan="2" th:text="${dateTrx}">@dateTrx</td>
         </tr>
 
         <tr>
-            <th colspan="2">Productos</th>
+            <th colspan="3">Productos</th>
         </tr>
         <tr>
             <td><b>Producto</b></td>
+            <td><b>Cantidad</b></td>
             <td><b>Precio</b></td>
         </tr>
-        <tr th:each="product : ${products}">
-            <td th:text="${product.name}">@productName</td>
-            <td th:text="${product.amount}">@productPrice</td>
+        <tr th:each="transactionItem : ${transactionItems}">
+            <td th:text="${transactionItem.product.name}">@productName</td>
+            <td th:text="${transactionItem.quantity}">@productName</td>
+            <td th:text="${transactionItem.product.amount}">@productPrice</td>
         </tr>
 
         <tr>
-            <td colspan="2" class="total-row">
+            <td colspan="3" class="total-row">
                 TOTAL: <span th:text="${total}">@total</span>
             </td>
         </tr>

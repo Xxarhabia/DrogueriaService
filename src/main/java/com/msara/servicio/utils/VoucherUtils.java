@@ -18,7 +18,7 @@ public class VoucherUtils {
     @Autowired
     private ITemplateEngine templateEngine;
 
-    public String generateVoucherSale(TransactionEntity transaction, UserEntity user) {
+    public String generateVoucherSale(TransactionEntity transaction, UserEntity user, double total) {
         Context context = new Context(Locale.getDefault());
 
         //user data
@@ -32,19 +32,11 @@ public class VoucherUtils {
         context.setVariable("dateTrx", transaction.getDateInsertTransaction());
 
         //product data
-        context.setVariable("products", transaction.getProducts());
+        context.setVariable("transactionItems", transaction.getTransactionItems());
 
         //tota;
-        context.setVariable("total", calculateTotal(transaction.getProducts()));
+        context.setVariable("total", total);
 
         return templateEngine.process("VoucherSale", context);
-    }
-
-    private double calculateTotal(List<ProductEntity> products) {
-        double total = 0;
-        for (ProductEntity product : products) {
-            total += product.getAmount();
-        }
-        return total;
     }
 }

@@ -47,7 +47,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionSaleResponse buyProduct(Long userId, boolean generateVoucher) throws SQLException {
 
         Connection connection = jdbcTemplate.getDataSource().getConnection();
-        String procedure = "CALL drogueria_schema.sp_buy_transaction(?,?,?,?)";
+        String procedure = "CALL drogueria_schema.sp_buy_transaction(?,?,?,?,?)";
 
         try (CallableStatement callableStatement = connection.prepareCall(procedure)) {
             connection.setAutoCommit(true);
@@ -56,20 +56,22 @@ public class TransactionServiceImpl implements TransactionService {
             callableStatement.registerOutParameter(2, Types.VARCHAR);
             callableStatement.registerOutParameter(3, Types.BOOLEAN);
             callableStatement.registerOutParameter(4, Types.BIGINT);
+            callableStatement.registerOutParameter(5, Types.DOUBLE);
             callableStatement.execute();
 
             String message = callableStatement.getString(2);
             boolean status = callableStatement.getBoolean(3);
             Long transactionId = callableStatement.getLong(4);
+            double total = callableStatement.getDouble(5);
 
-            if (generateVoucher) {
+            if (generateVoucher && status) {
                 TransactionEntity transaction = transactionRepository.findById(transactionId).orElseThrow(
                         () -> new RuntimeException("Transaction not found"));
                 UserEntity user = userRepository.findById(userId)
                         .orElseThrow(() -> new RuntimeException("User not found"));
 
                 String pdfVoucher;
-                String htmlVoucher = voucherUtils.generateVoucherSale(transaction, user);
+                String htmlVoucher = voucherUtils.generateVoucherSale(transaction, user, total);
                 try {
                     pdfVoucher = pdfUtils.generatePdf(htmlVoucher);
                 } catch (IOException e) {
