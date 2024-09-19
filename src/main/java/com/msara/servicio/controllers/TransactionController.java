@@ -1,7 +1,8 @@
 package com.msara.servicio.controllers;
 
+import com.msara.servicio.controllers.dto.request.TransactionAnnulmentRequest;
 import com.msara.servicio.controllers.dto.request.TransactionSaleRequest;
-import com.msara.servicio.controllers.dto.response.TransactionSaleResponse;
+import com.msara.servicio.controllers.dto.response.TransactionResponse;
 import com.msara.servicio.domain.repositories.UserRepository;
 import com.msara.servicio.services.impl.TransactionServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +24,24 @@ public class TransactionController {
     private UserRepository userRepository;
 
     @PostMapping("/buy")
-    public ResponseEntity<TransactionSaleResponse> saleTransaction(
+    public ResponseEntity<TransactionResponse> saleTransaction(
             @RequestBody TransactionSaleRequest transactionRequest) throws SQLException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Long userId = userRepository.findUserByEmail(username).orElseThrow().getId();
 
-        return new ResponseEntity<TransactionSaleResponse>(
+        return new ResponseEntity<TransactionResponse>(
                 transactionService.buyProduct(userId, transactionRequest.generateVoucher()), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/annulment")
+    public ResponseEntity<TransactionResponse> annulmentTransaction (
+            @RequestBody TransactionAnnulmentRequest transactionAnnulmentRequest) throws SQLException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Long userId = userRepository.findUserByEmail(username).orElseThrow().getId();
+
+        return new ResponseEntity<TransactionResponse>(transactionService.returnProduct(userId, transactionAnnulmentRequest), HttpStatus.NO_CONTENT);
     }
 
 }

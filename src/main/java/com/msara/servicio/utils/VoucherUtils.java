@@ -39,4 +39,23 @@ public class VoucherUtils {
 
         return templateEngine.process("VoucherSale", context);
     }
+
+    public String generateVoucherAnnulment(TransactionEntity transaction, UserEntity user) {
+        Context context = new Context(Locale.getDefault());
+
+        //user data
+        context.setVariable("username", user.getName());
+        context.setVariable("userAddress", user.getAddress());
+        context.setVariable("userEmail", user.getEmail());
+
+        //transaction data
+        context.setVariable("typeTrx", "Venta");
+        context.setVariable("reference", transaction.getReference());
+        context.setVariable("dateTrx", transaction.getDateUpdateTransaction());
+
+        //product data
+        context.setVariable("transactionItems", transaction.getTransactionItems());
+
+        return templateEngine.process("VoucherAnnulment", context);
+    }
 }
