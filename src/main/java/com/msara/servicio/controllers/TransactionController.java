@@ -41,7 +41,8 @@ public class TransactionController {
         String username = authentication.getName();
         Long userId = userRepository.findUserByEmail(username).orElseThrow().getId();
 
-        return new ResponseEntity<TransactionResponse>(transactionService.returnProduct(userId, transactionAnnulmentRequest), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<TransactionResponse>(
+                transactionService.returnProduct(userId, transactionAnnulmentRequest), HttpStatus.OK);
     }
 
 }
