@@ -19,10 +19,8 @@ public class ProductEntity {
     private Long id;
     private String name;
     private String reference;
-    private Double amount;
+    private double amount;
     private int stock;
+    private String category;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private CategoryEntity category;
 }

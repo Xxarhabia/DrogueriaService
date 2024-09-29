@@ -37,6 +37,8 @@ public class SecurityConfig {
                     http.requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll();
                     http.requestMatchers(HttpMethod.GET, "/api/products/**").permitAll();
                     http.requestMatchers(HttpMethod.GET, "/api/category/**").permitAll();
+                    http.requestMatchers("/api/transaction/**").hasRole("USER");
+                    http.requestMatchers("/api/cart/**").hasRole("USER");
                     http.requestMatchers("/api/products/**").hasRole("ADMIN");
                     http.requestMatchers("/api/category/**").hasRole("ADMIN");
                     http.anyRequest().denyAll();

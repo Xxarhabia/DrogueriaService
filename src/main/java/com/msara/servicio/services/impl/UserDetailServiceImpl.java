@@ -1,8 +1,8 @@
 package com.msara.servicio.services.impl;
 
-import com.msara.servicio.controllers.dto.AuthLoginRequest;
-import com.msara.servicio.controllers.dto.AuthRegisterRequest;
-import com.msara.servicio.controllers.dto.AuthResponse;
+import com.msara.servicio.controllers.dto.request.AuthLoginRequest;
+import com.msara.servicio.controllers.dto.request.AuthRegisterRequest;
+import com.msara.servicio.controllers.dto.response.AuthResponse;
 import com.msara.servicio.domain.entities.CartEntity;
 import com.msara.servicio.domain.entities.RoleEntity;
 import com.msara.servicio.domain.entities.UserEntity;

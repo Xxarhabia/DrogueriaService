@@ -6,23 +6,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "product_category")
+@NoArgsConstructor
+@Table(name = "vouchers")
 @Builder
-public class CategoryEntity {
+public class VoucherEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Column(name = "html_voucher", columnDefinition = "TEXT")
+    private String htmlVoucher;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<ProductEntity> products = new ArrayList<>();
+    @Column(name = "pdf_voucher", columnDefinition = "TEXT")
+    private String pdfVoucher;
 }

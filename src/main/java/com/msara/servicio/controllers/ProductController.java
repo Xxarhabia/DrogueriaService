@@ -1,11 +1,16 @@
 package com.msara.servicio.controllers;
 
+import com.msara.servicio.controllers.dto.request.ProductCreateRequest;
+import com.msara.servicio.controllers.dto.response.ProductResponse;
 import com.msara.servicio.domain.entities.ProductEntity;
 import com.msara.servicio.services.impl.ProductServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -16,20 +21,20 @@ public class ProductController {
     private ProductServiceImpl productService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createProduct(@RequestBody ProductEntity productReq) {
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductCreateRequest productReq) {
         try {
-            ProductEntity product = productService.createProduct(productReq);
-            return ResponseEntity.status(201).body(product);
+            return new ResponseEntity<>(productService.createProduct(productReq), HttpStatus.CREATED);
         } catch (Exception ex) {
-            return ResponseEntity.status(500).body(ex.getMessage());
+            return new ResponseEntity<>(new ProductResponse(
+                    "An error occurred while creating the product", LocalDateTime.now(), false),
+                    HttpStatus.CREATED);
         }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findProduct(@PathVariable Long id) {
         try {
-            ProductEntity productFound = productService.findProduct(id);
-            return ResponseEntity.status(200).body(productFound);
+            return ResponseEntity.status(200).body(productService.findProduct(id));
         } catch (Exception ex) {
             return ResponseEntity.status(500).body(ex.getMessage());
         }
@@ -38,31 +43,32 @@ public class ProductController {
     @GetMapping()
     public ResponseEntity<?> findProducts() {
         try {
-            List<ProductEntity> products = productService.findAllProducts();
-            return ResponseEntity.status(200).body(products);
+            return ResponseEntity.status(200).body(productService.findAllProducts());
         } catch (Exception ex) {
             return ResponseEntity.status(500).body(ex.getMessage());
         }
     }
 
-
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody ProductEntity productReq) {
+    public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductEntity productReq) {
         try {
-            ProductEntity product = productService.updateProduct(id, productReq);
-            return ResponseEntity.status(201).body(product);
+            return new ResponseEntity<ProductResponse>(productService.updateProduct(id, productReq), HttpStatus.OK);
         } catch (Exception ex) {
-            return ResponseEntity.status(500).body(ex.getMessage());
+            return new ResponseEntity<ProductResponse>(
+                    new ProductResponse(
+                            "A problem occurred updating the product", LocalDateTime.now(), false),
+                            HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long id) {
         try {
-            String productDeleted = productService.deleteProduct(id);
-            return ResponseEntity.status(201).body(productDeleted);
+            return new ResponseEntity<ProductResponse>(productService.deleteProduct(id), HttpStatus.NO_CONTENT);
         } catch (Exception ex) {
-            return ResponseEntity.status(500).body(ex.getMessage());
+            return new ResponseEntity<>(new ProductResponse(
+                    "Error occurred while deleting the product", LocalDateTime.now(), false),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

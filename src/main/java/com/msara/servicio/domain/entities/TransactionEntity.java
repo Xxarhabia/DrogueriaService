@@ -21,6 +21,8 @@ public class TransactionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
     private String reference;
 
     @Column(name = "type_trx")
@@ -33,10 +35,13 @@ public class TransactionEntity {
     @Column(name = "date_update_trx")
     private String dateUpdateTransaction;
 
+    @OneToMany(mappedBy = "transaction", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<TransactionItemEntity> transactionItems = new ArrayList<>();
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "transaction_products", joinColumns = @JoinColumn(name = "transaction_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
     private List<ProductEntity> products = new ArrayList<>();
 
     @ManyToMany(mappedBy = "transactions")
-    private List<UserEntity> user = new ArrayList<>();
+    private List<UserEntity> users = new ArrayList<>();
 }
